@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Inapp Attendance Register</title>
+<link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
+
+</head>
+
+<body>
+  <div class="navbar">
+    <div class="nav-brand">
+      <img src="{{ url_for('static', filename='images/logo.png')}}"/>
+    </div>
+    <!--<div class="navbar-right">
+      Attendace App
+    </div>
+    <div class="nav-app-name">Inapp Attendance App </div>-->
+  </div>
+
+  <div class="wrapper">
+    <div class="camera-wrapper">
+      <video autoplay="true" controls="false" id="videoElement" > </video>
+      <canvas id="canvasElement" style="display: none"></canvas>
+      <button id="start" class="timer start" onclick="startCamera()">Start</button>
+    </div>
+    <div class="mark-attendace">
+        <form id="attendance-form" action="/attendance" method="post" class="w-100">
+            <h2 id="name">Unknown</h2>
+            <input type="hidden" name="username" id="username">
+            <button class="btn btn-primary w-100" onclick="markAttendance()">
+              Mark Attendance
+            </button>
+        </form>
+    </div>
+  </div>
+  <div>
+      <img id="imageElement" src="{{ url_for('video_feed') }}">
+  </div>
+
+
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha256-k2WSCIexGzOj3Euiig+TlR8gA0EmPjuc79OEeY5L45g=" crossorigin="anonymous"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js"></script>
+
+    <script>
+
+        let namespace = "/video";
+        let video = document.querySelector("#videoElement");
+        let canvas = document.querySelector("#canvasElement");
+        let name = document.querySelector("#name");
+        let ctx = canvas.getContext('2d');
+        var localMediaStream = null;
+
+        var timer_fn = null;
+
+        var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port + namespace);
+        console.log(location.protocol + '//' + document.domain + ':' + location.port + namespace);
+
+        function sendSnapshot() {
+            if (!localMediaStream) {
+                return;
+            }
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            ctx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
+            let dataURL = canvas.toDataURL('image/jpeg');
+            console.log('Sending image data to server ...');
+            socket.emit('input image', dataURL);
+        }
+
+        socket.on('connect', function() {
+            console.log('Socket Connected!');
+        });
+
+        socket.on('response', function(data){
+            console.log("Response from server : " + data);
+            if(data != "Unknown")
+                name.innerHTML = data;
+        });
+
+        var constraints = {
+            audio: false,
+            video: {
+                facingMode: 'user'
+            }
+        }
+
+        function startCamera() {
+            let elem = document.getElementById('start');
+            if (elem.innerHTML == "Start") {
+                console.log("Starting camera ...")
+                elem.innerHTML = "Stop";
+                // Get access to the camera!
+                if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                    // Not adding `{ audio: true }` since we only want video now
+                    navigator.mediaDevices.getUserMedia({ video: true }).then(function(stream) {
+                        console.log("Camera started ...")
+                        video.srcObject = stream;
+                        localMediaStream = stream;
+                        video.play();
+
+                        timer_fn = setInterval(function() {
+                            sendSnapshot();
+                        }, 1000);
+                    })
+                    .catch(function(err) {
+                        console.log(err.name + ': ' + err.message);
+                    });
+
+
+                }
+            }
+            else {
+                console.log("Stopping camera ...")
+                elem.innerHTML = "Start";
+                clearInterval(timer_fn);
+                if(localMediaStream)
+                    localMediaStream.getTracks()[0].stop();
+            }
+        }
+
+        function markAttendance() {
+            var form = document.getElementById('attendance-form');
+            document.getElementById('username').value = name.innerHTML;
+            form.submit();
+        }
+    </script>
+</body>
+</html>

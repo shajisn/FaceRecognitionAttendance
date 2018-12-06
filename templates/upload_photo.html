@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=0.6">
+    <title>Admin: {{title}}</title>
+    <style type="text/css">
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial';
+        }
+
+        .column {
+            flex: 50%;
+            padding: 10px;
+        }
+
+        .columnLeft {
+            flex: 50%;
+            padding: 10px;
+            height: 640px;
+        }
+
+        .columnRight {
+            flex: 50%;
+            padding: 10px;
+            height: 640px;
+            align: 'middle';
+        }
+
+        /* Clear floats after the columns */
+        .row {
+            display: flex;
+        }
+
+        .mainHeading {
+            text-align: center;
+            background-color: #6940bc;
+            color: #fff;
+            font-family: 'Times New Roman';
+            padding: 10px;
+        }
+
+        .wrap h2 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .wrap {
+            overflow: hidden;
+            margin: auto;
+            margin-top: 0px!important;
+            margin-top: 120px;
+            padding: 20px;
+            background: #fff;
+            border: 1px solid silver;
+            border-radius: 5px;
+        }
+        .wrap canvas {
+            border:2px solid red;
+        }
+
+        .wrap .btn-upload {
+            padding: 5px;
+            width: 300px;
+            height: 40px;
+            background-color: #55add6;
+            color: #fff;
+            border: 0;
+            border-radius: 7px;
+            font-size: 18px;
+            text-align: center;
+        }
+        .wrap video {
+            padding-top: 55px;
+        }
+
+        #container {
+            margin: 0px auto;
+            border: 10px #333 solid;
+        }
+
+        #videoElement {
+            width: 640px;
+            height: 300px;
+            background-color: #666;
+        }
+
+        #imageElement {
+            width: 300px;
+            height: 300px;
+            background-color: #666;
+        }
+
+        #canvasElement {
+            width: 300px;
+            height: 300px;
+            display: none;
+        }
+
+    </style>
+    <script>
+        var localMediaStream = null;
+        var photoCount = 0;
+        var videoArray = []
+         function startCamera() {
+              let elem = document.getElementById('start');
+              var video = document.getElementById('video');
+
+              if (elem.innerHTML == "Start Camera") {
+                  elem.innerHTML = "Stop Camera";
+                  // Get access to the camera!
+                  if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                     // Not adding `{ audio: true }` since we only want video now
+                     navigator.mediaDevices.getUserMedia({ video: true }).then(function(stream) {
+                         //video.src = window.URL.createObjectURL(stream);
+                         video.srcObject = stream;
+                         localMediaStream = stream;
+                         video.play();
+                     });
+                  }
+              }
+              else {
+                 elem.innerHTML = "Start Camera";
+                 if(localMediaStream)
+                     localMediaStream.getTracks()[0].stop();
+              }
+         }
+
+         function snapPhoto() {
+             // Elements for taking the snapshot
+             var video = document.getElementById('video');
+             var canvas = document.getElementById('canvas' + photoCount);
+             canvas.width = video.videoWidth;
+             canvas.height = video.videoHeight;
+             var context = canvas.getContext('2d');
+
+             context.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
+
+             var canvas1 = document.getElementById('canvas' + photoCount + '' + photoCount);
+             var context1 = canvas1.getContext('2d');
+             context1.drawImage(video, 0, 0, 290, 220);
+
+             if(photoCount < 3)
+                photoCount++;
+         }
+
+         function dataURItoBlob(dataURI) {
+             // convert base64/URLEncoded data component to raw binary data held in a string
+             var byteString;
+             if (dataURI.split(',')[0].indexOf('base64') >= 0)
+                byteString = atob(dataURI.split(',')[1]);
+             else
+                byteString = unescape(dataURI.split(',')[1]);
+
+             // separate out the mime component
+             var mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
+
+             // write the bytes of the string to a typed array
+             var ia = new Uint8Array(byteString.length);
+             for (var i = 0; i < byteString.length; i++) {
+             	ia[i] = byteString.charCodeAt(i);
+             }
+             return new Blob([ia], {type:mimeString});
+         }
+
+          function uploadPhoto() {
+             // Elements for taking the snapshot
+             var data = {};
+             for (var i = 0; i <= photoCount; i++) {
+                var canvas = document.getElementById('canvas' + i);
+                var dataURL = canvas.toDataURL('image/jpeg');
+                data["image_"+ i] = dataURL
+             }
+             var jsonObj = JSON.stringify(data);
+             console.log(jsonObj)
+             var form = document.getElementById('upload-form');
+             document.getElementById('file-input').value = jsonObj;
+             form.submit();
+          }
+
+    </script>
+</head>
+
+<body>
+    <div class="mainHeading">
+        <h1>Attendance Monitoring System</h1>
+        <form action="/logout" method="post">
+            <input class="btn-upload" type="submit" class="btnfinal" name="logout" value="Logout">
+        </form>
+    </div>
+    <div>
+        <form id="upload-form" action="{{url_for('upload')}}" method=post enctype="multipart/form-data">
+            <canvas id="canvas0" style='display: none' ></canvas>
+            <canvas id="canvas1" style='display: none' ></canvas>
+            <canvas id="canvas2" style='display: none' ></canvas>
+            <canvas id="canvas3" style='display: none' ></canvas>
+            <input type="hidden" name="username" readonly value="{{user_id}}">
+            <input id="file-input" type="hidden" name="canvasImage">
+        </form>
+    </div>
+    <div class="row wrap">
+        <div class="wrap columnLeft">
+            <button id="start" class="btn-upload" onclick="startCamera()">Start Camera</button>
+            <button id="snap" class="btn-upload" onclick="snapPhoto()">Snap Photo</button>
+            <p></p>
+            <canvas id="canvas00" width="290" height="220" ></canvas>
+            <canvas id="canvas11" width="290" height="220"></canvas>
+            <canvas id="canvas22" width="290" height="220"></canvas>
+            <canvas id="canvas33" width="290" height="220"></canvas>
+            <div style=" text-align: center;">
+                <button class="btn-upload btn-send" onclick="uploadPhoto()">Upload</button>
+            </div>
+        </div>
+        <div class="wrap columnRight">
+            <video id="video" autoplay></video>
+        </div>
+    </div>
+</body>
+</html>
