@@ -45,7 +45,7 @@ class Attendance(Base):
     __tablename__ = 'attendance'
 
     id = Column(Integer, primary_key=True, server_default=FetchedValue())
-    user = Column(Integer, ForeignKey('users.id'))
+    user = Column(Integer, ForeignKey('users.user_id'))
     logged_on = Column(DateTime)
     logged_out = Column(DateTime)
 

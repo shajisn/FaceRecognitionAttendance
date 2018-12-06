@@ -2,7 +2,7 @@ import os
 import re
 import logging
 import json
-import datetime
+from datetime import datetime
 from sys import stdout
 
 from flask import Flask, render_template, request, Response
@@ -145,7 +145,7 @@ def upload():
             input_img = base64_to_pil_image(image_encoded)
 
             basename = user_id + name
-            suffix = datetime.datetime.now().strftime("%y%m%d_%H%M%S.jpg")
+            suffix = datetime.now().strftime("%y%m%d_%H%M%S.jpg")
             filename = "_".join([basename, suffix])
             print("Saving to: " + model + filename)
             input_img.save(model + filename)
@@ -252,22 +252,24 @@ def gen1():
 
 @app.route("/train", methods=['POST'])
 def train():
-    with tf.Graph().as_default():
-        with tf.Session() as sess:
-            # Create Multi-task Cascaded Convolutional Networks
-            pnet, rnet, onet = detect_and_align.create_mtcnn(sess, None)
-            # Load the model
-            load_model('./model/')
-            images_placeholder = tf.get_default_graph().get_tensor_by_name("input:0")
-            embeddings = tf.get_default_graph().get_tensor_by_name("embeddings:0")
-            phase_train_placeholder = tf.get_default_graph().get_tensor_by_name("phase_train:0")
-
-            id_dataset = id_data.get_id_data('./ids/', pnet, rnet, onet, sess, embeddings, images_placeholder,
-                                             phase_train_placeholder)
-            print_id_dataset_table(id_dataset)
-
-            test_run(pnet, rnet, onet, sess, images_placeholder, phase_train_placeholder, embeddings, id_dataset,
-                     None)
+    camera = None
+    camera = Camera()
+    # with tf.Graph().as_default():
+    #     with tf.Session() as sess:
+    #         # Create Multi-task Cascaded Convolutional Networks
+    #         pnet, rnet, onet = detect_and_align.create_mtcnn(sess, None)
+    #         # Load the model
+    #         load_model('./model/')
+    #         images_placeholder = tf.get_default_graph().get_tensor_by_name("input:0")
+    #         embeddings = tf.get_default_graph().get_tensor_by_name("embeddings:0")
+    #         phase_train_placeholder = tf.get_default_graph().get_tensor_by_name("phase_train:0")
+    #
+    #         id_dataset = id_data.get_id_data('./ids/', pnet, rnet, onet, sess, embeddings, images_placeholder,
+    #                                          phase_train_placeholder)
+    #         print_id_dataset_table(id_dataset)
+    #
+    #         test_run(pnet, rnet, onet, sess, images_placeholder, phase_train_placeholder, embeddings, id_dataset,
+    #                  None)
 
     return render_template("task.html", title="Home", msg="Training completed")
 
