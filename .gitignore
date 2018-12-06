@@ -6,5 +6,5 @@ es-env
 migrations
 .pyc
 model
-
+face_env/
 

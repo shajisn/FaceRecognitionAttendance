@@ -28,7 +28,7 @@ print(APP_ROOT)
 
 POSTGRES = {
     'user': 'postgres',
-    'pw': 'postgres',
+    'pw': 'ease@inapp1',
     'db': 'facerecognition',
     'host': 'localhost',
     'port': '5432',

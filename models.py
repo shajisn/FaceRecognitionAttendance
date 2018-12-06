@@ -7,7 +7,7 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 
 POSTGRES = {
     'user': 'postgres',
-    'pw': 'postgres',
+    'pw': 'ease@inapp1',
     'db': 'facerecognition',
     'host': 'localhost',
     'port': '5432',
