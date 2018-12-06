@@ -111,7 +111,7 @@ def signup():
         db_session.commit()
         return render_template("upload_photo.html", title="Upload Photo", user_id=name)
     else:
-        return render_template("signup.html", title="SignUp", user_id=name, msg="Username already present")
+        return render_template("upload_photo.html", title="Upload Photo", user_id=name)
 
 
 @app.route("/upload_photo.html", methods=['POST'])
