@@ -160,13 +160,14 @@ def verify():
 
 @app.route('/attendance', methods=['POST', 'GET'])
 def mark_attendance():
-    user_name = str(request.form["username"])
+    user_name = str(request.data)
+    print("Mark attendance of " + user_name)
     check_user = User.query.filter_by(name=user_name).first()
     if check_user is not None:
         new_attendance = Attendance(check_user.userID, datetime.utcnow())
         db_session.add(new_attendance)
         db_session.commit()
-    return render_template("verify.html")
+    return json.dumps({'status': 'OK'});
 
 
 @app.route('/logout', methods=['POST'])
@@ -183,7 +184,7 @@ def video_feed():
 def gen():
     while True:
         match_dict = camera.get_frame()
-        print("Returning converted frames...", match_dict)
+        print("Returning converted frames...")
         for i, (match_name, frame) in enumerate(match_dict.items()):
             print("index: {}, key: {}".format(i, match_name))
             with app.test_request_context():
