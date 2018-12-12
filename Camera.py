@@ -42,6 +42,13 @@ class Camera(object):
         print("Closing Tensor-flow session...")
         self.sess.close()
 
+    def reload_id_set(self):
+        print("reloading id set")
+        self.id_dataset = id_data.get_id_data('./ids/', self.pnet, self.rnet, self.onet, self.sess,
+                                              self.embeddings, self.images_placeholder,
+                                              self.phase_train_placeholder)
+        self.print_id_dataset_table()
+
     def init_tensor_flow(self):
         print("Initializing Tensor-flow ...")
         self.graph = tf.Graph()

@@ -14,7 +14,7 @@
 
 <div class="wrapper">
     <div class="logo-wrapper">
-        <img src="{{ url_for('static', filename='images/logo-white.png') }}"/>
+        <img src="{{ url_for('static', filename='images/name.innerHTML = data;logo-white.png') }}"/>
     </div>
     <div class="camera-wrapper">
         <video autoplay="true" controls="false" id="videoElement"></video>
@@ -55,6 +55,8 @@
         var localMediaStream = null;
 
         var timer_fn = null;
+        var detected_index = 0;
+        var detected_names = ["Unknown", "Unknown", "Unknown", "Unknown", "Unknown", "Unknown", "Unknown", "Unknown", "Unknown", "Unknown"];
 
         var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port + namespace);
         console.log(location.protocol + '//' + document.domain + ':' + location.port + namespace);
@@ -77,8 +79,19 @@
 
         socket.on('response', function(data){
             console.log("Response from server : " + data);
-            name.innerHTML = data;
+            detected_names[detected_index] = data;
+            detected_index++;
+            if(detected_index == 10)
+                detected_index = 0;
+
+            name.innerHTML = most_detected(detected_names.slice());
         });
+
+        function most_detected(arr){
+            return arr.sort((a,b) =>
+                arr.filter(v => v===a).length - arr.filter(v => v===b).length
+            ).pop();
+        }
 
         var constraints = {
             audio: false,
@@ -119,6 +132,8 @@
                     localMediaStream = null;
                 }
                 elem.removeAttribute("disabled");
+                name.innerHTML = "Unknown";
+                detected_names = ["Unknown", "Unknown", "Unknown", "Unknown", "Unknown", "Unknown", "Unknown", "Unknown", "Unknown", "Unknown"];
             }
         }
 

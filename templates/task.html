@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="en">
 	<head>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
 		<meta name="viewport" content="width=device-width, initial-scale=0.6">
 		<title>Admin: Task</title>
 		<style type="text/css">
@@ -40,7 +41,28 @@
                 border-radius: 7px;
                 font-size: 18px;
             }
+
+            div#loading {
+				width: 35px;
+				height: 35px;
+				display: none;
+				background: url('/static/images/ajax-loader.gif') no-repeat;
+				cursor: wait;
+			}
         </style>
+
+		<script type="text/javascript">
+            function loading(){
+                console.log("Start training ...");
+                $("#loading").show();
+                $("#content").hide();
+            }
+            <!--$("#train-form").submit(function(event){-->
+                <!--console.log("Start training ...");-->
+                <!--$("#loading").show();-->
+                <!--$("#content").hide();-->
+            <!--})-->
+        </script>
 	</head>
 
 
@@ -48,25 +70,26 @@
 		<div class="mainHeading">
             <h1>Attendance Monitoring System</h1>
         </div>
-    <div class="wrap">
-		<h2>Welcome Admin</h2>
-		<form action="/register" method="post">
-			<input type="submit" class="btn-login" value="Employee Registration">
-		</form>
-		<p></p>
-		<form action="/train" method="post">
-			<input type="submit" class = "btn-login" name="train" value="Train Model">
-			<p>{{msg}}</p>
-		</form>
-        <p></p>
-        <form action="/verify" method="post">
-			<input type="submit" class = "btn-login" name="verify" value="Verify">
-			<p>{{msg}}</p>
-		</form>
-		<p></p>
-		<form action="/logout" method="post">
-			<input type="submit" class = "btn-login" name="logout" value="Logout">
-		</form>
-	</div>
+		<div id="loading"></div>
+		<div id="content" class="wrap">
+			<h2>Welcome Admin</h2>
+			<form action="/register" method="post">
+				<input type="submit" class="btn-login" value="Employee Registration">
+			</form>
+			<p></p>
+			<form onsubmit="loading()" action="/train" method="post" id="train-form">
+				<input type="submit" class="btn-login" name="train" value="Train Model" >
+				<p>{{msg}}</p>
+			</form>
+			<!--<p></p>-->
+			<!--<form action="/verify" method="post">-->
+				<!--<input type="submit" class = "btn-login" name="verify" value="Verify">-->
+				<!--<p>{{msg}}</p>-->
+			<!--</form>-->
+			<p></p>
+			<form action="/logout" method="post">
+				<input type="submit" class = "btn-login" name="logout" value="Logout">
+			</form>
+		</div>
 	</body>
 </html>
