@@ -253,8 +253,9 @@ def gen1():
 
 @app.route("/train", methods=['POST'])
 def train():
-    camera = None
-    camera = Camera()
+    print("Training request arrived ...")
+    camera.reload_id_set()
+
     # with tf.Graph().as_default():
     #     with tf.Session() as sess:
     #         # Create Multi-task Cascaded Convolutional Networks
