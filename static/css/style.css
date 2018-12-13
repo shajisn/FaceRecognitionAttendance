@@ -46,9 +46,7 @@ html, body{
 .logo-wrapper {
     width: 220px;
     height: 80px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    text-align:center;
     flex-direction: column;
     background-color: #ab1f24;
     border-radius: 0 0 50px 50px;
